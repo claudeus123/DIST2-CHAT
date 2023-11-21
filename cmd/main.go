@@ -2,14 +2,20 @@ package main
 
 import (
 	"log"
-	"github.com/claudeus123/DIST2-CHAT/db"
+	"github.com/claudeus123/DIST2-CHAT/database"
+	"github.com/claudeus123/DIST2-CHAT/ws"
+	"github.com/claudeus123/DIST2-CHAT/router"
 )
 
 
 func main() {
-	_, err := db.ConnectDb()
-	if err != nil {
-		log.Fatalf("Error al conectar a la base de datos: %v", err)
-	}
-	log.Println("Conexión exitosa a la base de datos")
+	database.ConnectDb()
+	log.Println("Se conecto a la base de datos")
+
+	hub := ws.NewHub()
+	wsHandler := ws.NewHandler(hub)
+	go hub.Run()
+
+	router.InitRouter(wsHandler)
+	router.Start("0.0.0.0:8080")
 }
