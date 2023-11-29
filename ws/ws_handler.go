@@ -128,6 +128,40 @@ func (h *Handler) JoinRoom(c *gin.Context) {
 	cl.readMessage(h.hub)
 }
 
+func (h *Handler) JoinChat(c *gin.Context) {
+	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	chatID := c.Param("chatID")
+	intChatID, err := strconv.Atoi(chatID)
+	clientID := c.Query("userId")
+	username := c.Query("username")
+
+	cl := &Client{
+		Conn:     conn,
+		Message:  make(chan *Message, 10),
+		ID:       clientID,
+		ChatID:   uint(intChatID),
+		Username: username,
+	}
+
+	m := &Message{
+		Content:  "A new user has joined the room",
+		ChatID:   uint(intChatID),
+		Username: username,
+	}
+
+	h.hub.Register <- cl
+	h.hub.Broadcast <- m
+
+	go cl.writeMessage()
+	cl.readMessage(h.hub)
+}
+
+
 type RoomRes struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`

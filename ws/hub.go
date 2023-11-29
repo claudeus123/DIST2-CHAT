@@ -19,6 +19,10 @@
 
 package ws
 
+import(
+	"strconv"
+)
+
 type Room struct {
 	ID      string             `json:"id"`
 	Name    string             `json:"name"`
@@ -54,37 +58,77 @@ func NewHub() *Hub {
 	}
 }
 
+// func (h *Hub) Run() {
+// 	for {
+// 		select {
+// 		case cl := <-h.Register:
+// 			if _, ok := h.Rooms[cl.RoomID]; ok {
+// 				r := h.Rooms[cl.RoomID]
+
+// 				if _, ok := r.Clients[cl.ID]; !ok {
+// 					r.Clients[cl.ID] = cl
+// 				}
+// 			}
+// 		case cl := <-h.Unregister:
+// 			if _, ok := h.Rooms[cl.RoomID]; ok {
+// 				if _, ok := h.Rooms[cl.RoomID].Clients[cl.ID]; ok {
+// 					if len(h.Rooms[cl.RoomID].Clients) != 0 {
+// 						h.Broadcast <- &Message{
+// 							Content:  "user left the chat",
+// 							RoomID:   cl.RoomID,
+// 							Username: cl.Username,
+// 						}
+// 					}
+
+// 					delete(h.Rooms[cl.RoomID].Clients, cl.ID)
+// 					close(cl.Message)
+// 				}
+// 			}
+
+// 		case m := <-h.Broadcast:
+// 			if _, ok := h.Rooms[m.RoomID]; ok {
+
+// 				for _, cl := range h.Rooms[m.RoomID].Clients {
+// 					cl.Message <- m
+// 				}
+// 			}
+// 		}
+// 	}
+// }
+
 func (h *Hub) Run() {
 	for {
 		select {
 		case cl := <-h.Register:
-			if _, ok := h.Rooms[cl.RoomID]; ok {
-				r := h.Rooms[cl.RoomID]
+			chatID := strconv.Itoa(int(cl.ChatID))
+			if _, ok := h.Chats[chatID]; ok {
+				r := h.Chats[chatID]
 
 				if _, ok := r.Clients[cl.ID]; !ok {
 					r.Clients[cl.ID] = cl
 				}
 			}
 		case cl := <-h.Unregister:
-			if _, ok := h.Rooms[cl.RoomID]; ok {
-				if _, ok := h.Rooms[cl.RoomID].Clients[cl.ID]; ok {
-					if len(h.Rooms[cl.RoomID].Clients) != 0 {
+			chatID := strconv.Itoa(int(cl.ChatID))
+			if _, ok := h.Chats[chatID]; ok {
+				if _, ok := h.Chats[chatID].Clients[cl.ID]; ok {
+					if len(h.Chats[chatID].Clients) != 0 {
 						h.Broadcast <- &Message{
 							Content:  "user left the chat",
-							RoomID:   cl.RoomID,
+							ChatID:   cl.ChatID,
 							Username: cl.Username,
 						}
 					}
 
-					delete(h.Rooms[cl.RoomID].Clients, cl.ID)
+					delete(h.Chats[chatID].Clients, cl.ID)
 					close(cl.Message)
 				}
 			}
 
 		case m := <-h.Broadcast:
-			if _, ok := h.Rooms[m.RoomID]; ok {
-
-				for _, cl := range h.Rooms[m.RoomID].Clients {
+			chatID := strconv.Itoa(int(m.ChatID))
+			if chat, ok := h.Chats[chatID]; ok {
+				for _, cl := range chat.Clients {
 					cl.Message <- m
 				}
 			}
