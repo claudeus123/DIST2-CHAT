@@ -25,10 +25,18 @@ func InitRouter(wsHandler *ws.Handler) {
 		MaxAge: 12 * time.Hour,
 	}))
 
+	// r.Use(middlewares.Validate)
+
 	r.POST("/ws/createRoom", wsHandler.CreateRoom)
 	r.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
 	r.GET("/ws/getRooms", wsHandler.GetRooms)
+	r.GET("/ws/getChats", wsHandler.GetChats)
+	r.GET("/ws/getAvailableChats/:userId", wsHandler.GetAvailableChats)
 	r.GET("/ws/getClients/:roomId", wsHandler.GetClients)
+}
+
+func Initialize(wsHandler *ws.Handler){
+	wsHandler.InitializeChats()
 }
 
 func Start(addr string) error {

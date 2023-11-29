@@ -25,16 +25,29 @@ type Room struct {
 	Clients map[string]*Client `json:"clients"`
 }
 
+type Chat struct {
+	ID      uint             `json:"id"`
+	User1ID    uint             `json:"user1_id"`
+	User2ID    uint             `json:"user2_id"`
+
+	Clients map[string]*Client `json:"clients"`
+}
+
+
 type Hub struct {
 	Rooms      map[string]*Room
+	Chats 		map[string]*Chat
 	Register   chan *Client
 	Unregister chan *Client
 	Broadcast  chan *Message
 }
 
+
+
 func NewHub() *Hub {
 	return &Hub{
 		Rooms:      make(map[string]*Room),
+		Chats:		make(map[string]*Chat),
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 		Broadcast:  make(chan *Message, 5),

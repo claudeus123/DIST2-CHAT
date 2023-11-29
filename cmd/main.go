@@ -13,9 +13,11 @@ func main() {
 	log.Println("Se conecto a la base de datos")
 
 	hub := ws.NewHub()
-	wsHandler := ws.NewHandler(hub)
+	wsHandler := ws.NewHandler(hub, database.DB)
 	go hub.Run()
 
+
 	router.InitRouter(wsHandler)
+	router.Initialize(wsHandler)
 	router.Start("0.0.0.0:8080")
 }
