@@ -279,7 +279,44 @@ func (h *Handler) GetClients(c *gin.Context) {
 	c.JSON(http.StatusOK, clients)
 }
 
+func (h *Handler) GetChatClients(c *gin.Context) {
+	var clients []ClientRes
+	chatID := c.Param("chatID")
+
+	if _, ok := h.hub.Chats[chatID]; !ok {
+		clients = make([]ClientRes, 0)
+		c.JSON(http.StatusOK, clients)
+	}
+
+	for _, c := range h.hub.Chats[chatID].Clients {
+		clients = append(clients, ClientRes{
+			ID:       c.ID,
+			Username: c.Username,
+		})
+	}
+
+	c.JSON(http.StatusOK, clients)
+}
+
 // FALTA QUE AL HACER MATCH SE HAGA UN CREATE CHAT
+func (h *Handler) CreateChat(c *gin.Context) {
+	var req CreateChatReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	chatID := strconv.Itoa(int(req.ID)) // Convert uint to string
+
+	h.hub.Chats[chatID] = &Chat{
+		ID:       req.ID,
+		User1ID:  req.User1ID,
+		User2ID:  req.User2ID,
+		Clients:  make(map[string]*Client),
+	}
+
+	c.JSON(http.StatusOK, req)
+}
 // func (h *Handler) CreateRoom(c *gin.Context) {
 // 	var req CreateRoomReq
 // 	if err := c.ShouldBindJSON(&req); err != nil {

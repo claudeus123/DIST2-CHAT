@@ -14,13 +14,13 @@ func InitRouter(wsHandler *ws.Handler) {
 	r = gin.Default()
 
 	r.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:3333"},
 		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-			return origin == "http://localhost:3000"
+			return origin == "http://localhost:3000" || origin == "http://localhost:3333"
 		},
 		MaxAge: 12 * time.Hour,
 	}))
@@ -28,12 +28,14 @@ func InitRouter(wsHandler *ws.Handler) {
 	// r.Use(middlewares.Validate)
 
 	r.POST("/ws/createRoom", wsHandler.CreateRoom)
+	r.POST("/ws/createChat", wsHandler.CreateChat)
 	r.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
 	r.GET("/ws/joinChat/:chatID", wsHandler.JoinChat)
 	r.GET("/ws/getRooms", wsHandler.GetRooms)
 	r.GET("/ws/getChats", wsHandler.GetChats)
 	r.GET("/ws/getAvailableChats/:userId", wsHandler.GetAvailableChats)
 	r.GET("/ws/getClients/:roomId", wsHandler.GetClients)
+	r.GET("/ws/getChatClients/:chatID", wsHandler.GetChatClients)
 }
 
 func Initialize(wsHandler *ws.Handler){
