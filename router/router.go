@@ -26,7 +26,11 @@ func InitRouter(wsHandler *ws.Handler) {
 	}))
 
 	// r.Use(middlewares.Validate)
-
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})	
 	r.POST("/ws/createRoom", wsHandler.CreateRoom)
 	r.POST("/ws/createChat", wsHandler.CreateChat)
 	r.GET("/ws/joinRoom/:roomId", wsHandler.JoinRoom)
